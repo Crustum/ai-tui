@@ -1,0 +1,88 @@
+{
+    "name": "crustum/ai-tui",
+    "description": "AiTui plugin for CakePHP",
+    "type": "cakephp-plugin",
+    "license": "MIT",
+    "keywords": [
+        "cakephp",
+        "crustum",
+        "cakephp-ai",
+        "ai-tui"
+    ],
+    "authors": [
+        {
+            "name": "Evgeny Tomenko",
+            "homepage": "https://github.com/skie"
+        }
+    ],
+    "require": {
+        "php": ">=8.4",
+        "cakephp/cakephp": "^5.4",
+        "crustum/cakephp-ai": "^2.1",
+        "crustum/ai-interaction": "^1.0",
+        "league/commonmark": "^2.9",
+        "revolt/event-loop": "^1.0",
+        "symfony/tui": "^8.1.8",
+        "tempest/highlight": "^2.16"
+    },
+    "require-dev": {
+        "cakedc/cakephp-phpstan": "^4.3",
+        "cakephp/cakephp-codesniffer": "^5.3",
+        "crustum/plugin-manifest": "^1.2",
+        "phpstan/phpstan": "^2.3",
+        "phpunit/phpunit": "^13.0",
+        "rector/rector": "^2.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Crustum\\AiTui\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Crustum\\AiTui\\Test\\": "tests/",
+            "TestApp\\": "tests/TestApp/"
+        }
+    },
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@rector-check",
+            "@test",
+            "@analyse"
+        ],
+        "fix": [
+            "@cs-fix",
+            "@rector-fix",
+            "@cs-fix",
+            "@analyse"
+        ],
+        "analyse": [
+            "@stan"
+        ],
+        "cs-check": "phpcs -p --standard=phpcs.xml src/ tests/",
+        "cs-fix": "phpcbf --standard=phpcs.xml src/ tests/",
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite=Unit",
+        "test:feature": "phpunit --testsuite=Feature",
+        "rector-check": "vendor/bin/rector process --dry-run",
+        "rector-fix": "vendor/bin/rector process",
+        "stan": "phpstan analyse src/",
+        "stan-baseline": "phpstan analyse --generate-baseline"
+    },
+    "extra": {
+        "installer-name": "AiTui"
+    },
+    "suggest": {
+        "crustum/plugin-manifest": "CakePHP plugin installer"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "cakephp/plugin-installer": true,
+            "php-http/discovery": false
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

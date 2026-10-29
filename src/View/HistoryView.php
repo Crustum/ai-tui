@@ -149,15 +149,16 @@ final class HistoryView extends ContainerWidget
     /**
      * Shows the pending block for a tool invocation.
      *
-     * @param \Crustum\Ai\Responses\Data\ToolCall $tool Tool invocation data
+     * @param \Crustum\Ai\Responses\Data\ToolCall $tool Tool invocation data.
+     * @param string|null $summary Human-readable preview replacing the JSON argument dump.
      * @return void
      */
-    public function showToolCall(ToolCall $tool): void
+    public function showToolCall(ToolCall $tool, ?string $summary = null): void
     {
         $this->finishTurn();
         $key = $this->toolKey($tool);
         if (!isset($this->tools[$key])) {
-            $this->tools[$key] = new ToolView($tool);
+            $this->tools[$key] = new ToolView($tool, $summary);
             $this->add($this->tools[$key]);
         }
     }
@@ -165,10 +166,11 @@ final class HistoryView extends ContainerWidget
     /**
      * Completes the block of a finished tool invocation.
      *
-     * @param \Crustum\Ai\Responses\Data\ToolResult $result Finished tool result
+     * @param \Crustum\Ai\Responses\Data\ToolResult $result Finished tool result.
+     * @param string|null $summary Human-readable result line shown on completion.
      * @return void
      */
-    public function showToolResult(ToolResult $result): void
+    public function showToolResult(ToolResult $result, ?string $summary = null): void
     {
         $this->finishTurn();
         $key = 'call:' . $result->id;
@@ -181,7 +183,7 @@ final class HistoryView extends ContainerWidget
             $this->add($this->tools[$key]);
         }
 
-        $this->tools[$key]->complete($result);
+        $this->tools[$key]->complete($result, $summary);
     }
 
     /**

@@ -35,6 +35,13 @@ final class MainView extends ContainerWidget
     private readonly HistoryView $history;
 
     /**
+     * Human-readable tool presentation, null renders raw argument dumps.
+     *
+     * @var \Crustum\AiTui\View\ToolPresenter|null
+     */
+    private ?ToolPresenter $toolPresenter = null;
+
+    /**
      * Chat header.
      *
      * @var \Crustum\AiTui\View\HeaderView
@@ -550,7 +557,8 @@ final class MainView extends ContainerWidget
             throw new LogicException('No turn is in progress.');
         }
 
-        $this->history->showToolCall($tool);
+        $summary = $this->toolPresenter?->summarizeCall($tool->name, $tool->arguments);
+        $this->history->showToolCall($tool, $summary);
         $this->getContext()?->requestRender();
     }
 
@@ -567,8 +575,20 @@ final class MainView extends ContainerWidget
             throw new LogicException('No turn is in progress.');
         }
 
-        $this->history->showToolResult($result);
+        $summary = $this->toolPresenter?->summarizeResult($result->name, $result->result);
+        $this->history->showToolResult($result, $summary);
         $this->getContext()?->requestRender();
+    }
+
+    /**
+     * Sets the human-readable tool presentation.
+     *
+     * @param \Crustum\AiTui\View\ToolPresenter|null $presenter Tool presenter, null renders raw argument dumps.
+     * @return void
+     */
+    public function setToolPresenter(?ToolPresenter $presenter): void
+    {
+        $this->toolPresenter = $presenter;
     }
 
     /**

@@ -42,24 +42,45 @@ final class ToolView extends ContainerWidget
     private readonly ToolCall $tool;
 
     /**
+     * Human-readable call preview shown instead of the JSON argument dump.
+     *
+     * @var string|null
+     */
+    private ?string $callSummary;
+
+    /**
+     * Human-readable result line shown on completion.
+     *
+     * @var string|null
+     */
+    private ?string $resultSummary = null;
+
+    /**
      * Builds the block with the pending invocation preview.
      *
-     * @param \Crustum\Ai\Responses\Data\ToolCall $tool Tool invocation data
+     * @param \Crustum\Ai\Responses\Data\ToolCall $tool Tool invocation data.
+     * @param string|null $summary Human-readable preview replacing the JSON argument dump.
      */
-    public function __construct(ToolCall $tool)
+    public function __construct(ToolCall $tool, ?string $summary = null)
     {
         $this->tool = $tool;
+        $this->callSummary = $summary;
         $this->display();
     }
 
     /**
      * Refreshes the block with the finished tool result.
      *
-     * @param \Crustum\Ai\Responses\Data\ToolResult $result Finished tool result
+     * @param \Crustum\Ai\Responses\Data\ToolResult $result Finished tool result.
+     * @param string|null $summary Human-readable result line shown on completion.
      * @return void
      */
-    public function complete(ToolResult $result): void
+    public function complete(ToolResult $result, ?string $summary = null): void
     {
+        if ($summary !== null && trim($summary) !== '') {
+            $this->resultSummary = $summary;
+        }
+
         $this->display($result->error());
     }
 
@@ -85,7 +106,10 @@ final class ToolView extends ContainerWidget
         }
 
         $parameterStyle = new Style(color: Theme::SECONDARY);
-        if (!$nested && $inputs !== []) {
+        $callSummary = $this->callSummary;
+        $hasSummary = $callSummary !== null && trim($callSummary) !== '';
+
+        if (!$hasSummary && !$nested && $inputs !== []) {
             $parameters = [];
             foreach ($inputs as $name => $value) {
                 $parameters[] = StringUtils::stripControlBytes((string)$name) . ': ' . $this->encode($value);
@@ -95,8 +119,18 @@ final class ToolView extends ContainerWidget
         }
 
         $this->add(new TextWidget($title));
-        if ($nested) {
+        if ($hasSummary) {
+            $this->add((new TextWidget($callSummary))
+                ->setStyle(new Style(padding: new Padding(0, 0, 0, 2), color: Theme::SECONDARY)));
+        } elseif ($nested) {
             $this->add((new TextWidget($this->preview($this->encode($inputs, pretty: true))))
+                ->setStyle(new Style(padding: new Padding(0, 0, 0, 2), color: Theme::SECONDARY)));
+        }
+
+        $resultSummary = $this->resultSummary;
+
+        if ($resultSummary !== null && trim($resultSummary) !== '') {
+            $this->add((new TextWidget('└ ' . StringUtils::stripControlBytes($resultSummary)))
                 ->setStyle(new Style(padding: new Padding(0, 0, 0, 2), color: Theme::SECONDARY)));
         }
 

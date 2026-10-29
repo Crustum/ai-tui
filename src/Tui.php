@@ -11,6 +11,7 @@ use Crustum\AiInteraction\InteractionCommand\TurnRunner as InteractionTurnRunner
 use Crustum\AiTui\Terminal\WindowsConsoleTerminal;
 use Crustum\AiTui\View\MainView;
 use Crustum\AiTui\View\Theme;
+use Crustum\AiTui\View\ToolPresenter;
 use LogicException;
 use RuntimeException;
 use Symfony\Component\Tui\Tui as SymfonyTui;
@@ -131,6 +132,23 @@ final class Tui
     public function setDescription(string $description): static
     {
         $this->mainView->setDescription($description);
+
+        return $this;
+    }
+
+    /**
+     * Sets the human-readable tool presentation.
+     *
+     * Hosts whose tools ask questions out of band pass a presenter so call
+     * blocks show the question instead of raw JSON; null keeps the default
+     * argument dump.
+     *
+     * @param \Crustum\AiTui\View\ToolPresenter|null $presenter Tool presenter.
+     * @return static
+     */
+    public function setToolPresenter(?ToolPresenter $presenter): static
+    {
+        $this->mainView->setToolPresenter($presenter);
 
         return $this;
     }

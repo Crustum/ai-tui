@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Crustum\AiTui\Test\Unit\View;
 
 use Crustum\Ai\Responses\Data\ToolCall;
+use Crustum\Ai\Responses\Data\ToolResult;
 use Crustum\AiTui\View\ToolView;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Tui\Ansi\AnsiUtils;
@@ -48,6 +49,40 @@ final class ToolViewTest extends TestCase
         self::assertStringEndsWith('…', $text);
         self::assertLessThan(340, mb_strlen($text));
         self::assertStringNotContainsString('HIDDEN_TAIL', $text);
+    }
+
+    public function testCallSummaryReplacesTheJsonDump(): void
+    {
+        $view = new ToolView(
+            new ToolCall(id: 'ask-1', name: 'AskUser', arguments: [
+                'question' => 'How to proceed?',
+                'options' => [['label' => 'First', 'description' => 'Details here']],
+            ]),
+            "How to proceed?\n1) First — Details here",
+        );
+        $text = $this->render($view);
+
+        self::assertStringContainsString('● AskUser', $text);
+        self::assertStringContainsString('How to proceed?', $text);
+        self::assertStringContainsString('1) First', $text);
+        self::assertStringNotContainsString('"question"', $text);
+        self::assertStringNotContainsString('"options"', $text);
+    }
+
+    public function testResultSummaryAppendsTheAnswer(): void
+    {
+        $view = new ToolView(
+            new ToolCall(id: 'ask-1', name: 'AskUser', arguments: ['question' => 'How to proceed?']),
+            'How to proceed?',
+        );
+        $view->complete(
+            new ToolResult(id: 'ask-1', name: 'AskUser', arguments: [], result: 'First option'),
+            'Chose: First option',
+        );
+        $text = $this->render($view);
+
+        self::assertStringContainsString('How to proceed?', $text);
+        self::assertStringContainsString('└ Chose: First option', $text);
     }
 
     /**
